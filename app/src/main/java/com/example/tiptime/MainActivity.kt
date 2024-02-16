@@ -19,6 +19,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -65,6 +66,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun EditNumberField(
+    @StringRes label: Int,
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -73,7 +75,7 @@ fun EditNumberField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier,
-        label = { Text(text = stringResource(R.string.bill_amount))},
+        label = { Text(stringResource(label))},
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
@@ -87,8 +89,12 @@ fun TipTimeLayout() {
     var inputAmount by remember {
         mutableStateOf("")
     }
+    var inputPercent by remember {
+        mutableStateOf("")
+    }
     val amount = inputAmount.toDoubleOrNull() ?: 0.0
-    val tip = calculateTip(amount)
+    val tipPercent = inputPercent.toDoubleOrNull() ?: 15.0
+    val tip = calculateTip(amount, tipPercent)
     Column(
         modifier = Modifier
             .statusBarsPadding()
@@ -104,6 +110,7 @@ fun TipTimeLayout() {
                 .align(alignment = Alignment.Start)
         )
         EditNumberField(
+            label = R.string.bill_amount,
             value = inputAmount,
             onValueChange = { inputAmount = it },
             modifier = Modifier
@@ -123,7 +130,7 @@ fun TipTimeLayout() {
  * according to the local currency.
  * Example would be "$10.00".
  */
-private fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
+private fun calculateTip(amount: Double, tipPercent: Double): String {
     val tip = tipPercent / 100 * amount
     return NumberFormat.getCurrencyInstance().format(tip)
 }
